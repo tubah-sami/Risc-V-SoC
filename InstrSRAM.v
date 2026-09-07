@@ -7,7 +7,7 @@ module InstrSRAM #(
     parameter INIT_FILE = "imem.mem"     
 ) (
     input  wire        clk,              
-    input  wire        ce,               
+    input  wire        ce,         // chip enable      
     input  wire [31:0] addr,             
     output wire [31:0] rdata             // instruction word
 );
