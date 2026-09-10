@@ -21,8 +21,7 @@ module RV32I_Core (
     output wire [3:0]  periph_be,
     output wire        periph_valid,
     input  wire [31:0] periph_rdata, 
-    input  wire        periph_ack, 
-    input  wire        periph_error    
+    input  wire        periph_ack 
 );
 
 
@@ -63,13 +62,13 @@ assign dsram_addr  = dmem_addr_i;
 assign dsram_wdata = dmem_wdata_i;
 assign dsram_we    = dmem_we_i & dsram_sel;   
 assign dsram_be    = dmem_be_i;
-assign dsram_ce    = dsram_sel;                
+assign dsram_ce    = dsram_sel & mem_active;                
 
 assign periph_addr  = dmem_addr_i;
 assign periph_wdata = dmem_wdata_i;
 assign periph_we    = dmem_we_i & periph_sel;  
 assign periph_re    = dmem_re_i & periph_sel;  
 assign periph_be    = dmem_be_i;  
-    assign periph_valid = periph_sel & (dmem_we_i | dmem_re_i);
+assign periph_valid = periph_sel & mem_active;
 
 endmodule
