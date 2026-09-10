@@ -14,9 +14,7 @@ module SCDP (
     output wire        dmem_we,       
     output wire        dmem_re,
     output wire [3:0]  dmem_be,
-    input  wire [31:0] dmem_rdata,
-
-    output wire [31:0] pc_out_dbg
+    input  wire [31:0] dmem_rdata
 );
 
 // ─────────────────────────────────────────────────────────────
@@ -249,10 +247,5 @@ ProgramCounter program_counter (
     .in    (pc_next),
     .out   (pc_out)
 );
-
-// ─────────────────────────────────────────────────────────────
-//  Debug
-// ─────────────────────────────────────────────────────────────
-assign pc_out_dbg = pc_out;
 
 endmodule
