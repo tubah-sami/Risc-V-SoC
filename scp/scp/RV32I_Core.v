@@ -18,11 +18,11 @@ module RV32I_Core (
     output wire [31:0] periph_wdata,
     output wire        periph_we,    
     output wire        periph_re,    
-    output wire [3:0]  periph_be,    
+    output wire [3:0]  periph_be,
+    output wire        periph_valid,
     input  wire [31:0] periph_rdata, 
-    input  wire        periph_ack,   
-
-    output wire [31:0] pc_out       
+    input  wire        periph_ack, 
+    input  wire        periph_error    
 );
 
 
@@ -31,7 +31,6 @@ wire [31:0] dmem_wdata_i;
 wire        dmem_we_i;      
 wire        dmem_re_i;      
 wire [3:0]  dmem_be_i;      
-wire [31:0] pc_out_i;
 
 //  Address Decoder
 wire periph_sel = (dmem_addr_i[31:28] == 4'h4);
@@ -57,8 +56,7 @@ SCDP u_scdp (
     .dmem_we    (dmem_we_i),
     .dmem_re    (dmem_re_i),
     .dmem_be    (dmem_be_i),
-    .dmem_rdata (dmem_rdata_mux),   
-    .pc_out_dbg (pc_out_i)
+    .dmem_rdata (dmem_rdata_mux)
 );
 
 assign dsram_addr  = dmem_addr_i;
@@ -71,11 +69,7 @@ assign periph_addr  = dmem_addr_i;
 assign periph_wdata = dmem_wdata_i;
 assign periph_we    = dmem_we_i & periph_sel;  
 assign periph_re    = dmem_re_i & periph_sel;  
-assign periph_be    = dmem_be_i;               
-
-// ─────────────────────────────────────────────────────────────
-//  Debug
-// ─────────────────────────────────────────────────────────────
-assign pc_out = pc_out_i;
+assign periph_be    = dmem_be_i;  
+    assign periph_valid = periph_sel & (dmem_we_i | dmem_re_i);
 
 endmodule
