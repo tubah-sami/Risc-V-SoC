@@ -1,0 +1,80 @@
+# ============================================================
+# soc_top.mmmc  –  Multi-Mode Multi-Corner Setup
+# Target: TSMC 180nm
+# ============================================================
+
+# ── Library Sets (one per corner) ────────────────────────────
+# Note: Ensure the fast and typical SRAM macro filenames match your directory.
+create_library_set -name libs_slow \
+    -timing [list ../pdk/lib/slow.lib ../pdk/lib/ram_256x16A_slow_syn.lib]
+
+create_library_set -name libs_fast \
+    -timing [list ../pdk/lib/fast.lib ../pdk/lib/ram_256x16A_fast_syn.lib]
+
+create_library_set -name libs_typ \
+    -timing [list ../pdk/lib/typical.lib ../pdk/lib/ram_256x16A_typical_syn.lib]
+
+# ── 2. Timing Conditions (Stylus Common UI) ───────────────────
+create_timing_condition -name tc_slow \
+    -library_sets [list libs_slow]
+
+create_timing_condition -name tc_fast \
+    -library_sets [list libs_fast]
+
+create_timing_condition -name tc_typ \
+    -library_sets [list libs_typ]
+    
+# ── RC Corners (wire parasitics per temperature/process) ─────
+create_rc_corner -name rc_worst \
+    -pre_route_res   1.0 \
+    -pre_route_cap   1.0 \
+    -post_route_res  {1.0 1.0 1.0} \
+    -post_route_cap  {1.0 1.0 1.0} \
+    -temperature     125
+
+create_rc_corner -name rc_best \
+    -pre_route_res   1.0 \
+    -pre_route_cap   1.0 \
+    -post_route_res  {1.0 1.0 1.0} \
+    -post_route_cap  {1.0 1.0 1.0} \
+    -temperature     -40
+
+create_rc_corner -name rc_typ \
+    -pre_route_res   1.0 \
+    -pre_route_cap   1.0 \
+    -post_route_res  {1.0 1.0 1.0} \
+    -post_route_cap  {1.0 1.0 1.0} \
+    -temperature     25
+
+# ── 4. Delay Corners ─────────────────────────────────────────
+create_delay_corner -name dc_slow \
+    -timing_condition tc_slow \
+    -rc_corner        rc_worst
+
+create_delay_corner -name dc_fast \
+    -timing_condition tc_fast \
+    -rc_corner        rc_best
+
+create_delay_corner -name dc_typ \
+    -timing_condition tc_typ \
+    -rc_corner        rc_typ
+
+# ── Constraint Modes ─────────────────────────────────────────
+create_constraint_mode -name func_mode \
+    -sdc_files [list ../synthesis/outputs/soc_top_mapped.sdc]
+
+# ── Analysis Views ───────────────────────────────────────────
+# Setup: check at slow corner (worst case for setup)
+create_analysis_view -name av_setup \
+    -constraint_mode func_mode \
+    -delay_corner    dc_slow
+
+# Hold: check at fast corner (worst case for hold)
+create_analysis_view -name av_hold \
+    -constraint_mode func_mode \
+    -delay_corner    dc_fast
+
+# ── Set Active Views ─────────────────────────────────────────
+set_analysis_view \
+    -setup [list av_setup] \
+    -hold  [list av_hold]
